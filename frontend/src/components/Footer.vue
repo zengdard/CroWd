@@ -1,67 +1,191 @@
 <template>
-  <footer class="bg-gray-900 text-white mt-auto">
-    <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <!-- About -->
-        <div>
-          <div class="flex items-center mb-4">
-            <span class="text-2xl mr-2">🦀</span>
-            <span class="font-bold text-xl text-red-500">CrabFunding</span>
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Logo/About -->
+        <div class="footer-column">
+          <div class="logo">
+            <span class="crab">🦀</span>
+            <span class="brand">CrabFunding</span>
           </div>
-          <p class="text-gray-400">
-            Empowering creators and innovators through community-driven crowdfunding.
-          </p>
+          <p>Empowering creators and innovators through community-driven crowdfunding.</p>
         </div>
  
         <!-- For Creators -->
-        <div>
-          <h3 class="text-lg font-semibold mb-4">For Creators</h3>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-gray-400 hover:text-red-500">Start a Project</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-red-500">Creator Guidelines</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-red-500">Resources</a></li>
+        <div class="footer-column">
+          <h3>For Creators</h3>
+          <ul>
+            <li><a href="#">Start a Project</a></li>
+            <li><a href="#">Creator Guidelines</a></li>
+            <li><a href="#">Resources</a></li>
           </ul>
         </div>
  
         <!-- Support -->
-        <div>
-          <h3 class="text-lg font-semibold mb-4">Support</h3>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-gray-400 hover:text-red-500">Help Center</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-red-500">Trust & Safety</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-red-500">Contact Us</a></li>
+        <div class="footer-column">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Trust & Safety</a></li>
+            <li><a href="#">Contact Us</a></li>
           </ul>
         </div>
  
         <!-- Newsletter -->
-        <div>
-          <h3 class="text-lg font-semibold mb-4">Stay Connected</h3>
-          <div class="flex">
-            <input 
-              type="email" 
-              placeholder="Your email"
-              class="flex-1 px-4 py-2 rounded-l-md text-gray-900"
-            >
-            <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-r-md transition-colors">
-              Subscribe
-            </button>
+        <div class="footer-column">
+          <h3>Stay Connected</h3>
+          <div class="newsletter">
+            <input type="email" placeholder="Your email">
+            <button>Subscribe</button>
           </div>
         </div>
       </div>
  
-      <!-- Footer Bottom -->
-      <div class="border-t border-gray-800 mt-12 pt-8">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <p class="text-gray-400 text-sm">
-            © {{ new Date().getFullYear() }} CrabFunding. All rights reserved.
-          </p>
-          <div class="flex gap-6 mt-4 md:mt-0">
-            <a href="#" class="text-gray-400 hover:text-red-500">Privacy</a>
-            <a href="#" class="text-gray-400 hover:text-red-500">Terms</a>
-            <a href="#" class="text-gray-400 hover:text-red-500">Legal</a>
-          </div>
+      <div class="footer-bottom">
+        <p>© {{ new Date().getFullYear() }} CrabFunding. All rights reserved.</p>
+        <div class="legal-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Legal</a>
         </div>
       </div>
     </div>
   </footer>
  </template>
+ 
+ <style scoped>
+ footer {
+  background-color: #111827;
+  color: white;
+  padding: 4rem 0 2rem;
+ }
+ 
+ .container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+ }
+ 
+ .footer-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+ }
+ 
+ @media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+ }
+ 
+ .footer-column h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+ }
+ 
+ .footer-column p {
+  color: #9ca3af;
+  line-height: 1.5;
+ }
+ 
+ .logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+ }
+ 
+ .crab {
+  font-size: 1.75rem;
+  margin-right: 0.5rem;
+ }
+ 
+ .brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ef4444;
+ }
+ 
+ .footer-column ul {
+  list-style: none;
+  padding: 0;
+ }
+ 
+ .footer-column ul li {
+  margin-bottom: 0.75rem;
+ }
+ 
+ .footer-column a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+ }
+ 
+ .footer-column a:hover {
+  color: #ef4444;
+ }
+ 
+ .newsletter {
+  display: flex;
+ }
+ 
+ .newsletter input {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.375rem 0 0 0.375rem;
+  background: white;
+ }
+ 
+ .newsletter button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0 0.375rem 0.375rem 0;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+ }
+ 
+ .newsletter button:hover {
+  background: #dc2626;
+ }
+ 
+ .footer-bottom {
+  padding-top: 2rem;
+  border-top: 1px solid #374151;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+ }
+ 
+ @media (min-width: 768px) {
+  .footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+ }
+ 
+ .footer-bottom p {
+  color: #9ca3af;
+  font-size: 0.875rem;
+ }
+ 
+ .legal-links {
+  display: flex;
+  gap: 1.5rem;
+ }
+ 
+ .legal-links a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+ }
+ 
+ .legal-links a:hover {
+  color: #ef4444;
+ }
+ </style>

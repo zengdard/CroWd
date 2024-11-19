@@ -1,362 +1,326 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-interface RegisterFormData {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
+interface FormData {
+ email: string
+ password: string
+ confirmPassword: string
+ username: string
 }
 
 const router = useRouter()
 const authStore = useAuthStore()
 
-const formData = ref<RegisterFormData>({
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: ''
+const formData = ref<FormData>({
+ email: '',
+ password: '',
+ confirmPassword: '',
+ username: ''
 })
+
 const error = ref('')
 const loading = ref(false)
 
 const isValidForm = computed(() => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(formData.value.email) && 
-         formData.value.password.length >= 6 &&
-         formData.value.name.length >= 2 &&
-         formData.value.password === formData.value.confirmPassword
+ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+ return emailRegex.test(formData.value.email) && 
+        formData.value.password.length >= 6 &&
+        formData.value.password === formData.value.confirmPassword &&
+        formData.value.username.length >= 3
 })
 
 const handleSubmit = async () => {
-  if (!isValidForm.value) {
-    error.value = 'Please check your inputs'
-    return
-  }
+ if (!isValidForm.value) {
+   error.value = 'Please check your inputs'
+   return
+ }
 
-  try {
-    loading.value = true
-    error.value = ''
-    
-    // Supposons que nous ayons une méthode register dans le store
-    await authStore.register({
-      name: formData.value.name,
-      email: formData.value.email,
-      password: formData.value.password
-    })
-    
-    router.push('/editor')
-  } catch (e: any) {
-    error.value = e.message || 'Registration failed. Please try again.'
-  } finally {
-    loading.value = false
-  }
+ try {
+   loading.value = true
+   error.value = ''
+   
+   await authStore.register({
+     email: formData.value.email,
+     password: formData.value.password,
+     username: formData.value.username
+   })
+   
+ } catch (e: any) {
+   error.value = e.message || 'Registration failed. Please try again.'
+ } finally {
+   loading.value = false
+ }
 }
+
+onUnmounted(() => {
+ formData.value = {
+   email: '',
+   password: '',
+   confirmPassword: '',
+   username: ''
+ }
+ error.value = ''
+})
 </script>
 
 <template>
-  <div class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
-      </div>
-      
-      <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-        <div class="rounded-md shadow-sm space-y-2">
-          <div>
-            <label for="name" class="sr-only">Full name</label>
-            <input
-              v-model="formData.name"
-              id="name"
-              name="name"
-              type="text"
-              required
-              :disabled="loading"
-              class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Full name"
-            >
-          </div>
-          
-          <div>
-            <label for="email-address" class="sr-only">Email address</label>
-            <input
-              v-model="formData.email"
-              id="email-address"
-              name="email"
-              type="email"
-              autocomplete="email"
-              required
-              :disabled="loading"
-              class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
-            >
-          </div>
-          
-          <div>
-            <label for="password" class="sr-only">Password</label>
-            <input
-              v-model="formData.password"
-              id="password"
-              name="password"
-              type="password"
-              required
-              :disabled="loading"
-              class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
-            >
-          </div>
-          
-          <div>
-            <label for="confirm-password" class="sr-only">Confirm password</label>
-            <input
-              v-model="formData.confirmPassword"
-              id="confirm-password"
-              name="confirm-password"
-              type="password"
-              required
-              :disabled="loading"
-              class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Confirm password"
-            >
-          </div>
-        </div>
+ <div class="register-container">
+   <div class="register-box">
+     <div class="register-header">
+       <div class="logo">
+         <span class="crab-icon">🦀</span>
+         <span class="brand">CrabFunding</span>
+       </div>
+       <h2>Create your account</h2>
+     </div>
+     
+     <form class="register-form" @submit.prevent="handleSubmit">
+       <div class="form-inputs">
+         <div class="input-group">
+           <label for="username">Username</label>
+           <input
+             v-model="formData.username"
+             id="username"
+             type="text"
+             autocomplete="username"
+             required
+             :disabled="loading"
+             placeholder="Choose a username"
+           >
+         </div>
 
-        <div v-if="error" role="alert" class="text-red-600 text-sm text-center bg-red-50 p-2 rounded">
-          {{ error }}
-        </div>
+         <div class="input-group">
+           <label for="email-address">Email</label>
+           <input
+             v-model="formData.email"
+             id="email-address"
+             type="email"
+             autocomplete="email"
+             required
+             :disabled="loading"
+             placeholder="Enter your email"
+           >
+         </div>
 
-        <div>
-          <button
-            type="submit"
-            :disabled="loading || !isValidForm"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-              <span 
-                class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" 
-                aria-hidden="true"
-              >
-                {{ loading ? '⌛' : '📝' }}
-              </span>
-            </span>
-            {{ loading ? 'Creating account...' : 'Create account' }}
-          </button>
-        </div>
+         <div class="input-group">
+           <label for="password">Password</label>
+           <input
+             v-model="formData.password"
+             id="password"
+             type="password"
+             autocomplete="new-password"
+             required
+             :disabled="loading"
+             placeholder="Create a password"
+           >
+         </div>
 
-        <div class="text-sm text-center">
-          <router-link 
-            to="/login" 
-            class="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Already have an account? Sign in
-          </router-link>
-        </div>
-      </form>
-    </div>
-  </div>
+         <div class="input-group">
+           <label for="confirm-password">Confirm Password</label>
+           <input
+             v-model="formData.confirmPassword"
+             id="confirm-password"
+             type="password"
+             autocomplete="new-password"
+             required
+             :disabled="loading"
+             placeholder="Confirm your password"
+           >
+         </div>
+       </div>
+
+       <div v-if="error" class="error-message">
+         {{ error }}
+       </div>
+
+       <button
+         type="submit"
+         :disabled="loading || !isValidForm"
+         class="register-button"
+       >
+         <span class="button-icon">{{ loading ? '⌛' : '🔒' }}</span>
+         <span class="button-text">{{ loading ? 'Creating account...' : 'Create account' }}</span>
+       </button>
+
+       <div class="login-link">
+         <router-link to="/login">
+           Already have an account? Sign in
+         </router-link>
+       </div>
+     </form>
+   </div>
+ </div>
 </template>
-<style>
-/* Reset et styles de base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+
+<style scoped>
+.register-container {
+ min-height: 100vh;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 1.5rem;
+ background: linear-gradient(135deg, #f6f8fd 0%, #ffffff 100%);
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f3f4f6;
-  color: #1f2937;
+.register-box {
+ width: 100%;
+ max-width: 32rem;
+ background: white;
+ padding: 2.5rem 2rem;
+ border-radius: 1rem;
+ box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+ transition: transform 0.3s ease;
 }
 
-/* Container principal */
-.min-h {
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem;
+.register-box:hover {
+ transform: translateY(-5px);
 }
 
-/* Formulaire container */
-.max-w-md {
-  max-width: 28rem;
-  width: 100%;
-  margin: 0 auto;
+.register-header {
+ text-align: center;
+ margin-bottom: 2rem;
 }
 
-.space-y-8 > * + * {
-  margin-top: 2rem;
+.logo {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ margin-bottom: 1.5rem;
 }
 
-.space-y-6 > * + * {
-  margin-top: 1.5rem;
+.crab-icon {
+ font-size: 2rem;
+ margin-right: 0.5rem;
 }
 
-.space-y-2 > * + * {
-  margin-top: 0.5rem;
+.brand {
+ font-size: 1.5rem;
+ font-weight: 700;
+ color: #dc2626;
 }
 
-/* Titre */
 h2 {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 1.875rem;
-  font-weight: 800;
-  color: #111827;
+ font-size: 1.5rem;
+ color: #1f2937;
+ font-weight: 700;
 }
 
-/* Formulaire */
-form {
-  margin-top: 2rem;
+.register-form {
+ display: flex;
+ flex-direction: column;
+ gap: 1.5rem;
 }
 
-/* Groupe d'inputs */
-.rounded-md {
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+.form-inputs {
+ display: flex;
+ flex-direction: column;
+ gap: 1rem;
 }
 
-/* Labels cachés */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.input-group {
+ display: flex;
+ flex-direction: column;
+ gap: 0.5rem;
 }
 
-/* Inputs */
+.input-group label {
+ font-size: 0.875rem;
+ font-weight: 500;
+ color: #4b5563;
+}
+
 input {
-  display: block;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background-color: white;
-  color: #111827;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-input::placeholder {
-  color: #9ca3af;
+ width: 100%;
+ padding: 0.75rem 1rem;
+ border: 2px solid #e5e7eb;
+ border-radius: 0.5rem;
+ font-size: 1rem;
+ transition: all 0.3s ease;
 }
 
 input:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  z-index: 10;
+ outline: none;
+ border-color: #dc2626;
+ box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
-input:disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
+.error-message {
+ padding: 0.75rem;
+ background: #fef2f2;
+ color: #dc2626;
+ border-radius: 0.5rem;
+ font-size: 0.875rem;
+ animation: fadeIn 0.3s ease;
 }
 
-/* Message d'erreur */
-[role="alert"] {
-  margin-top: 1rem;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  background-color: #fef2f2;
-  color: #dc2626;
-  font-size: 0.875rem;
-  text-align: center;
+.register-button {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 0.5rem;
+ width: 100%;
+ padding: 0.875rem;
+ background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+ color: white;
+ border: none;
+ border-radius: 0.5rem;
+ font-size: 1rem;
+ font-weight: 500;
+ cursor: pointer;
+ transition: all 0.3s ease;
 }
 
-/* Bouton de soumission */
-button[type="submit"] {
-  position: relative;
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  margin-top: 1.5rem;
-  border: none;
-  border-radius: 0.375rem;
-  background-color: #4f46e5;
-  color: white;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+.register-button:not(:disabled):hover {
+ transform: translateY(-2px);
+ box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
 }
 
-button[type="submit"]:hover:not(:disabled) {
-  background-color: #4338ca;
+.register-button:disabled {
+ opacity: 0.7;
+ cursor: not-allowed;
 }
 
-button[type="submit"]:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px #4f46e5;
+.button-icon {
+ font-size: 1.25rem;
 }
 
-button[type="submit"]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.login-link {
+ text-align: center;
+ font-size: 0.875rem;
 }
 
-/* Icône dans le bouton */
-button[type="submit"] span.absolute {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6366f1;
+.login-link a {
+ color: #dc2626;
+ text-decoration: none;
+ font-weight: 500;
+ transition: color 0.2s ease;
 }
 
-/* Lien de connection */
-.text-sm {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 0.875rem;
+.login-link a:hover {
+ color: #b91c1c;
+ text-decoration: underline;
 }
 
-a {
-  color: #4f46e5;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
+@keyframes fadeIn {
+ from {
+   opacity: 0;
+   transform: translateY(-10px);
+ }
+ to {
+   opacity: 1;
+   transform: translateY(0);
+ }
 }
 
-a:hover {
-  color: #4338ca;
-}
-
-/* Responsive design */
-@media (min-width: 640px) {
-  .min-h {
-    padding: 3rem 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .min-h{
-    padding: 3rem 2rem;
-  }
-}
-
-@media (max-width: 639px) {
-  h2 {
-    font-size: 1.5rem;
-  }
-  
-  input, button[type="submit"] {
-    font-size: 1rem;
-  }
+@media (max-width: 640px) {
+ .register-box {
+   padding: 2rem 1.5rem;
+ }
+ 
+ h2 {
+   font-size: 1.25rem;
+ }
 }
 </style>

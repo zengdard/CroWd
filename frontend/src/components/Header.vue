@@ -7,7 +7,7 @@ const isMenuOpen = ref(false)
 
 const navigation = [
  { name: 'Discover', href: '/discover' },
- { name: 'Start Project', href: '/start' },
+ { name: 'Start Project', href: '/start' }, 
  { name: 'About', href: '/about' },
  { name: 'How It Works', href: '/how-it-works' }
 ]
@@ -18,91 +18,217 @@ const toggleMenu = () => {
 </script>
 
 <template>
- <header class="bg-white shadow-sm fixed w-full top-0 z-50">
-   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-     <div class="flex justify-between h-16">
+ <header>
+   <nav>
+     <div class="nav-container">
        <!-- Logo -->
-       <div class="flex-shrink-0 flex items-center">
-         <router-link to="/" class="flex items-center">
-           <span class="text-2xl mr-2">🦀</span>
-           <span class="font-bold text-xl text-red-600">CrabFunding</span>
-         </router-link>
-       </div>
+       <router-link to="/" class="logo">
+         <span class="crab">🦀</span>
+         <span class="brand">CrabFunding</span>
+       </router-link>
 
        <!-- Desktop Navigation -->
-       <div class="hidden sm:flex sm:space-x-8 items-center">
+       <div class="desktop-nav">
          <router-link
            v-for="item in navigation"
            :key="item.name"
            :to="item.href"
-           class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+           class="nav-link"
          >
            {{ item.name }}
          </router-link>
          
-         <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
+         <button class="sign-in-btn">
            Sign In
          </button>
        </div>
 
-       <!-- Mobile menu button -->
-       <div class="flex items-center sm:hidden">
-         <button
-           @click="toggleMenu"
-           class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+       <!-- Mobile Menu Button -->
+       <button class="mobile-menu-btn" @click="toggleMenu">
+         <span class="sr-only">Open menu</span>
+         <svg
+           class="menu-icon"
+           xmlns="http://www.w3.org/2000/svg"
+           fill="none"
+           viewBox="0 0 24 24"
+           stroke="currentColor"
          >
-           <span class="sr-only">Open main menu</span>
-           <svg
-             class="h-6 w-6"
-             xmlns="http://www.w3.org/2000/svg"
-             fill="none"
-             viewBox="0 0 24 24"
-             stroke="currentColor"
-           >
-             <path
-               v-if="isMenuOpen"
-               stroke-linecap="round"
-               stroke-linejoin="round"
-               stroke-width="2"
-               d="M6 18L18 6M6 6l12 12"
-             />
-             <path
-               v-else
-               stroke-linecap="round"
-               stroke-linejoin="round"
-               stroke-width="2"
-               d="M4 6h16M4 12h16M4 18h16"
-             />
-           </svg>
-         </button>
-       </div>
+           <path
+             v-if="isMenuOpen"
+             stroke-linecap="round"
+             stroke-linejoin="round"
+             stroke-width="2"
+             d="M6 18L18 6M6 6l12 12"
+           />
+           <path
+             v-else
+             stroke-linecap="round"
+             stroke-linejoin="round"
+             stroke-width="2"
+             d="M4 6h16M4 12h16M4 18h16"
+           />
+         </svg>
+       </button>
      </div>
 
      <!-- Mobile Navigation -->
-     <div
-       v-show="isMenuOpen"
-       class="sm:hidden"
-     >
-       <div class="pt-2 pb-3 space-y-1">
-         <router-link
-           v-for="item in navigation"
-           :key="item.name"
-           :to="item.href"
-           class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50"
-         >
-           {{ item.name }}
-         </router-link>
-         <button class="w-full text-left px-3 py-2 text-base font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
-           Sign In
-         </button>
-       </div>
+     <div class="mobile-nav" v-show="isMenuOpen">
+       <router-link
+         v-for="item in navigation"
+         :key="item.name"
+         :to="item.href"
+         class="mobile-nav-link"
+       >
+         {{ item.name }}
+       </router-link>
+       <button class="mobile-sign-in">
+         Sign In
+       </button>
      </div>
    </nav>
  </header>
 </template>
 
 <style scoped>
-.router-link-active {
+header {
+ background: white;
+ box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+ position: fixed;
+ width: 100%;
+ top: 0;
+ z-index: 50;
+}
+
+nav {
+ max-width: 80rem;
+ margin: 0 auto;
+ padding: 0 1rem;
+}
+
+.nav-container {
+ display: flex;
+ justify-content: space-between;
+ height: 4rem;
+ align-items: center;
+}
+
+.logo {
+ display: flex;
+ align-items: center;
+ text-decoration: none;
+}
+
+.crab {
+ font-size: 1.5rem;
+ margin-right: 0.5rem;
+}
+
+.brand {
+ font-weight: 700;
+ font-size: 1.25rem;
  color: #dc2626;
 }
+
+.desktop-nav {
+ display: none;
+ align-items: center;
+ gap: 2rem;
+}
+
+@media (min-width: 640px) {
+ .desktop-nav {
+   display: flex;
+ }
+}
+
+.nav-link {
+ color: #4b5563;
+ text-decoration: none;
+ padding: 0.5rem 0.75rem;
+ border-radius: 0.375rem;
+ font-size: 0.875rem;
+ font-weight: 500;
+ transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.router-link-active {
+ color: #dc2626;
+}
+
+.sign-in-btn {
+ background: #dc2626;
+ color: white;
+ padding: 0.5rem 1rem;
+ border-radius: 0.375rem;
+ border: none;
+ font-weight: 500;
+ cursor: pointer;
+ transition: background 0.2s;
+}
+
+.sign-in-btn:hover {
+ background: #b91c1c;
+}
+
+.mobile-menu-btn {
+ display: flex;
+ align-items: center;
+ padding: 0.5rem;
+ border-radius: 0.375rem;
+ border: none;
+ color: #6b7280;
+ background: transparent;
+ cursor: pointer;
+}
+
+@media (min-width: 640px) {
+ .mobile-menu-btn {
+   display: none;
+ }
+}
+
+.menu-icon {
+ height: 1.5rem;
+ width: 1.5rem;
+}
+
+.mobile-nav {
+ display: flex;
+ flex-direction: column;
+ padding: 0.5rem 0 0.75rem;
+ gap: 0.25rem;
+}
+
+.mobile-nav-link {
+ display: block;
+ padding: 0.5rem 0.75rem;
+ color: #4b5563;
+ text-decoration: none;
+ font-weight: 500;
+ border-radius: 0.375rem;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.router-link-active {
+ color: #dc2626;
+ background: #f3f4f6;
+}
+
+.mobile-sign-in {
+ margin: 0.5rem 0.75rem 0;
+ padding: 0.5rem;
+ background: #dc2626;
+ color: white;
+ border: none;
+ border-radius: 0.375rem;
+ font-weight: 500;
+ text-align: left;
+ cursor: pointer;
+}
+
+.mobile-sign-in:hover {
+ background: #b91c1c;
+}
+
 </style>
