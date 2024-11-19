@@ -1,184 +1,67 @@
 <template>
-  <footer>
-    <div class="container">
-      <div class="footer-grid">
-        <!-- Colonne 1 : À propos -->
-        <div class="footer-column">
-          <h3>About LaTeX Editor Pro</h3>
-          <p>
-            Professional LaTeX editor for mathematicians, scientists, and educators.
+  <footer class="bg-gray-900 text-white mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <!-- About -->
+        <div>
+          <div class="flex items-center mb-4">
+            <span class="text-2xl mr-2">🦀</span>
+            <span class="font-bold text-xl text-red-500">CrabFunding</span>
+          </div>
+          <p class="text-gray-400">
+            Empowering creators and innovators through community-driven crowdfunding.
           </p>
         </div>
-
-        <!-- Colonne 2 : Liens rapides -->
-        <div class="footer-column">
-          <h3>Quick Links</h3>
-          <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li><router-link to="/editor">Features</router-link></li>
-            <li><router-link to="/learning">Learning</router-link></li>
-            <li><a href="#">Templates</a></li>
+ 
+        <!-- For Creators -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">For Creators</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-400 hover:text-red-500">Start a Project</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-red-500">Creator Guidelines</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-red-500">Resources</a></li>
           </ul>
         </div>
-
-        <!-- Colonne 3 : Support -->
-        <div class="footer-column">
-          <h3>Support</h3>
-          <ul>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">FAQ</a></li>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Community</a></li>
+ 
+        <!-- Support -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Support</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-400 hover:text-red-500">Help Center</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-red-500">Trust & Safety</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-red-500">Contact Us</a></li>
           </ul>
         </div>
-
-        <!-- Colonne 4 : Newsletter -->
-        <div class="footer-column">
-          <h3>Stay Updated</h3>
-          <div class="newsletter">
-            <input
-              type="email"
-              placeholder="Enter your email"
-            />
-            <button>Subscribe</button>
+ 
+        <!-- Newsletter -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Stay Connected</h3>
+          <div class="flex">
+            <input 
+              type="email" 
+              placeholder="Your email"
+              class="flex-1 px-4 py-2 rounded-l-md text-gray-900"
+            >
+            <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-r-md transition-colors">
+              Subscribe
+            </button>
           </div>
         </div>
       </div>
-
-      <!-- Bas de footer -->
-      <div class="footer-bottom">
-        <div class="footer-bottom-content">
-          <div class="copyright">
-            © {{ new Date().getFullYear() }} LaTeX Editor Pro. All rights reserved.
-          </div>
-          <div class="legal-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
+ 
+      <!-- Footer Bottom -->
+      <div class="border-t border-gray-800 mt-12 pt-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <p class="text-gray-400 text-sm">
+            © {{ new Date().getFullYear() }} CrabFunding. All rights reserved.
+          </p>
+          <div class="flex gap-6 mt-4 md:mt-0">
+            <a href="#" class="text-gray-400 hover:text-red-500">Privacy</a>
+            <a href="#" class="text-gray-400 hover:text-red-500">Terms</a>
+            <a href="#" class="text-gray-400 hover:text-red-500">Legal</a>
           </div>
         </div>
       </div>
     </div>
   </footer>
-</template>
-
-<style scoped>
-footer {
-  background-color: #1f2937;
-  color: white;
-  margin-top: auto;
-}
-
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-
-@media (min-width: 768px) {
-  .footer-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.footer-column h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.footer-column p {
-  color: #9ca3af;
-}
-
-.footer-column ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-column ul li {
-  margin-bottom: 0.5rem;
-}
-
-.footer-column a {
-  color: #9ca3af;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-column a:hover {
-  color: white;
-}
-
-.newsletter {
-  display: flex;
-}
-
-.newsletter input {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem 0 0 0.5rem;
-  border: none;
-  width: 100%;
-  color: #1f2937;
-}
-
-.newsletter button {
-  background-color: #9333ea;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0 0.5rem 0.5rem 0;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.newsletter button:hover {
-  background-color: #7e22ce;
-}
-
-.footer-bottom {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #374151;
-}
-
-.footer-bottom-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .footer-bottom-content {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-.copyright {
-  color: #9ca3af;
-  font-size: 0.875rem;
-}
-
-.legal-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.legal-links a {
-  color: #9ca3af;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.legal-links a:hover {
-  color: white;
-}
-</style>
+ </template>
