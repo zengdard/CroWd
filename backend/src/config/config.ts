@@ -1,11 +1,47 @@
 // config/config.ts
-export const config = {
+import dotenv from 'dotenv';
+dotenv.config();
+
+interface Config {
   db: {
-    name: process.env.DB_NAME || 'latex_formula',
-    user: process.env.DB_USER || 'admin',
-    password: process.env.DB_PASSWORD || 'votre_mot_de_passe',
-    host: process.env.DB_HOST || 'localhost',
+    uri: string;
+  };
+  jwt: {
+    secret: string;
+    expiresIn: string;
+  };
+  port: string | number;
+  cors: {
+    origin: string[];
+    credentials: boolean;
+  };
+  session: {
+    secret: string;
+    secure: boolean;
+  };
+  recaptcha?: {
+    secret: string;
+  };
+}
+
+export const config: Config = {
+  db: {
+    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/crowdfunding'
   },
-  jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
-  port: process.env.PORT || 3000
+  jwt: {
+    secret: process.env.JWT_SECRET || 'your-secret-key',
+    expiresIn: '24h'
+  },
+  port: process.env.PORT || 3000,
+  cors: {
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'],
+    credentials: true
+  },
+  session: {
+    secret: process.env.SESSION_SECRET || 'session-secret-key',
+    secure: process.env.NODE_ENV === 'production'
+  },
+  recaptcha: {
+    secret: process.env.RECAPTCHA_SECRET || ''
+  }
 };

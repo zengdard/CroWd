@@ -1,45 +1,56 @@
 // Import des routes
 import authRoutes from './routes/auth.routes';
-import formulaRoutes from './routes/formula.routes';
-import tutorialRoutes from './routes/tutorial.routes';
+import projectRoutes from './routes/project.routes';
+import contributionRoutes from './routes/contribution.routes';
 // backend/src/server.ts
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { config } from './config/config';
 import { connectDB } from './config/database';
 import { errorHandler } from './middleware/error.middleware';
+import { configureSecurityMiddleware } from './middleware/security.middleware';
 
 const app = express();
 
 // Configuration CORS
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost'], // Ajoutez tous vos origins autorisés
-  credentials: true, // Si vous utilisez des cookies/sessions
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: config.cors.origin,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
 }));
 
 // Autres middleware
-app.use(helmet());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Configuration de la sécurité
+configureSecurityMiddleware(app);
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/formulas', formulaRoutes);
-app.use('/api/tutorials', tutorialRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/contributions', contributionRoutes);
 
 // Error handling
 app.use(errorHandler);
 
-// Start server
-const PORT = config.port || 3000;
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: `Route ${req.originalUrl} not found`
+  });
+});
 
+// Start server
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    app.listen(config.port, () => {
+      console.log(`Server running on port ${config.port}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

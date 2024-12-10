@@ -1,12 +1,12 @@
 // middleware/premium.middleware.ts
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types/custom';
-import Subscription from '../models/subscription.model';
+import { Subscription } from '../models/subscription.model';
 import { ApiError } from '../utils/ApiError';
 
 export const requirePremium = async (
   req: AuthRequest,
-  res: Response, 
+  _res: Response,
   next: NextFunction
 ) => {
   try {

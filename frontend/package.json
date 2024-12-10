@@ -14,9 +14,7 @@
     "pinia": "^2.1.7",
     "vue": "^3.3.9",
     "vue-router": "^4.2.5",
-    "vite-plugin-monaco-editor": "^1.1.0",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
+    "mongoose": "^8.0.3",
     "stripe":"17.3.1"
 
   },

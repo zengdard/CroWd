@@ -1,11 +1,14 @@
 // backend/src/utils/ApiError.ts
 export class ApiError extends Error {
-    constructor(
-      public statusCode: number,
-      public message: string,
-      public details?: any
-    ) {
-      super(message);
-      this.name = 'ApiError';
-    }
+  statusCode: number;
+  errors?: any[];
+
+  constructor(statusCode: number, message: string, errors?: any[]) {
+    super(message);
+    this.statusCode = statusCode;
+    this.errors = errors;
+    
+    // Set the prototype explicitly
+    Object.setPrototypeOf(this, ApiError.prototype);
   }
+}

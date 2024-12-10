@@ -11,6 +11,7 @@ services:
       - app-network
 
   backend:
+    image: node:20-alpine
     build:
       context: ./backend
       dockerfile: Dockerfile

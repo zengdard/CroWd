@@ -1,37 +1,38 @@
-
 // middleware/auth.middleware.ts
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { config } from '../config/config';
-import User from '../models/user.model';
+import { User } from '../models/user.model';
 import { ApiError } from '../utils/ApiError';
-import { AuthRequest } from '../types/custom';
+import { config } from '../config/config';
 
-export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw new ApiError(401, 'Authentication required');
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
     }
+  }
+}
 
-    const token = authHeader.split(' ')[1];
+export const authMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
     if (!token) {
-      throw new ApiError(401, 'Authentication required');
+      throw new ApiError(401, 'Non authentifié');
     }
 
     try {
-      const decoded = jwt.verify(token, config.jwtSecret) as jwt.JwtPayload;
-      const user = await User.findByPk(decoded.userId);
+      const decoded = jwt.verify(token, config.jwt.secret) as { id: string };
+      const user = await User.findById(decoded.id);
 
       if (!user) {
-        throw new ApiError(401, 'User not found');
+        throw new ApiError(401, 'Utilisateur non trouvé');
       }
 
       req.user = user;
       next();
     } catch (error) {
-      throw new ApiError(401, 'Invalid token');
+      throw new ApiError(401, 'Token invalide');
     }
   } catch (error) {
     next(error);

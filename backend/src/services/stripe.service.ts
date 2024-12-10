@@ -1,10 +1,9 @@
 // services/stripe.service.ts
-import Subscription from '../models/subscription.model';
+import { Subscription } from '../models/subscription.model';
 import Stripe from 'stripe';
 
-
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-10-28.acacia'
+  apiVersion: '2023-10-16'
 });
 
 interface StripeInvoice {
@@ -39,30 +38,28 @@ export class StripeService {
       }
   static async handleInvoicePayment(invoice: StripeInvoice) {
     const subscription = await Subscription.findOne({
-      where: { stripeSubscriptionId: invoice.subscription }
+      stripeSubscriptionId: invoice.subscription
     });
 
     if (!subscription) return;
 
     if (invoice.status === 'paid') {
-      await subscription.update({
-        status: 'active',
-        currentPeriodEnd: new Date(invoice.lines.data[0].period.end * 1000)
-      });
+      subscription.status = 'active';
+      subscription.currentPeriodEnd = new Date(invoice.lines.data[0].period.end * 1000);
+      await subscription.save();
     } else if (invoice.status === 'failed') {
-      await subscription.update({ 
-        status: 'past_due' 
-      });
+      subscription.status = 'past_due';
+      await subscription.save();
     }
     
   }
   
   // Ajoutez d'autres méthodes de gestion Stripe ici
-  static async createCheckoutSession(userId: number, priceId: string) {
-    // Logique de création de session
+  static async createCheckoutSession(_userId: number, _priceId: string) {
+    // TODO: Implémenter la logique
   }
 
-  static async cancelSubscription(subscriptionId: string) {
-    // Logique d'annulation
+  static async cancelSubscription(_subscriptionId: string) {
+    // TODO: Implémenter la logique
   }
 }

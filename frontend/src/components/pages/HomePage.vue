@@ -23,7 +23,7 @@ const features = [
 ]
 
 const goToProjects = () => {
- router.push('/projects')
+ router.push('/discover')
 }
 </script>
 
@@ -44,7 +44,7 @@ const goToProjects = () => {
 
            <div class="cta-wrapper">
              <button @click="goToProjects" class="cta-button">
-               Start Project
+               Discover Project
              </button>
            </div>
          </div>

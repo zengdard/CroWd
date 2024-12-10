@@ -13,11 +13,11 @@
  
         <!-- For Creators -->
         <div class="footer-column">
-          <h3>For Creators</h3>
+          <h3>Pour les créateurs</h3>
           <ul>
-            <li><a href="#">Start a Project</a></li>
-            <li><a href="#">Creator Guidelines</a></li>
-            <li><a href="#">Resources</a></li>
+            <li><router-link to="/start">Lancer un projet</router-link></li>
+            <li><router-link to="/how-it-works">Comment ça marche</router-link></li>
+            <li><router-link to="/help">Ressources</router-link></li>
           </ul>
         </div>
  
@@ -25,28 +25,38 @@
         <div class="footer-column">
           <h3>Support</h3>
           <ul>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Trust & Safety</a></li>
-            <li><a href="#">Contact Us</a></li>
+            <li><router-link to="/help">Centre d'aide</router-link></li>
+            <li><router-link to="/trust-safety">Confiance & Sécurité</router-link></li>
+            <li><router-link to="/contact">Nous contacter</router-link></li>
+          </ul>
+        </div>
+ 
+        <!-- Discover -->
+        <div class="footer-column">
+          <h3>Découvrir</h3>
+          <ul>
+            <li><router-link to="/discover">Projets</router-link></li>
+            <li><router-link to="/categories">Catégories</router-link></li>
+            <li><router-link to="/success-stories">Success Stories</router-link></li>
           </ul>
         </div>
  
         <!-- Newsletter -->
         <div class="footer-column">
-          <h3>Stay Connected</h3>
+          <h3>Restez connecté</h3>
           <div class="newsletter">
-            <input type="email" placeholder="Your email">
-            <button>Subscribe</button>
+            <input type="email" placeholder="Votre email">
+            <button>S'abonner</button>
           </div>
         </div>
       </div>
  
       <div class="footer-bottom">
-        <p>© {{ new Date().getFullYear() }} CrabFunding. All rights reserved.</p>
+        <p>© {{ new Date().getFullYear() }} CrabFunding. Tous droits réservés.</p>
         <div class="legal-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Legal</a>
+          <router-link to="/privacy">Confidentialité</router-link>
+          <router-link to="/terms">Conditions</router-link>
+          <router-link to="/legal">Mentions légales</router-link>
         </div>
       </div>
     </div>
@@ -75,7 +85,7 @@
  
  @media (min-width: 768px) {
   .footer-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
  }
  

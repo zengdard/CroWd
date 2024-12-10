@@ -23,15 +23,46 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../components/pages/Discover.vue')
   },
   {
-    path: '/start-project',
-    name: 'start-project',
+    path: '/start',
+    name: 'start',
     component: () => import('../components/pages/StartProject.vue'),
-    meta: { requiresAuth: true } // Ajout d'une protection pour nécessiter l'authentification
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/how-it-works',
+    name: 'howItWorks',
+    component: () => import('../components/pages/HowItWorks.vue')
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../components/pages/Profile.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/about',
     name: 'about',
     component: () => import('../components/pages/About.vue')
+  },
+  {
+    path: '/help',
+    name: 'helpCenter',
+    component: () => import('../components/pages/support/HelpCenter.vue')
+  },
+  {
+    path: '/trust-safety',
+    name: 'trustAndSafety',
+    component: () => import('../components/pages/support/TrustAndSafety.vue')
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('../components/pages/support/Contact.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'notFound',
+    component: () => import('../components/pages/NotFound.vue')
   }
 ];
 
@@ -40,12 +71,10 @@ const router = createRouter({
   routes
 });
 
-// Navigation guard pour les routes protégées
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    // Rediriger vers la page de connexion si l'utilisateur n'est pas authentifié
     next({ name: 'login', query: { redirect: to.fullPath } });
   } else {
     next();

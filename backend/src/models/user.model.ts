@@ -1,76 +1,53 @@
 // models/user.model.ts
-import { Model, DataTypes, Optional } from 'sequelize';
+import { Schema, model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { sequelize } from '../config/database';
 
-export interface UserAttributes {
-  id: number;
+export interface IUser extends Document {
+  username: string;
   email: string;
-  password: string;
-  name: string;
+  password_hash: string;
+  created_at: Date;
+  updated_at: Date;
+  two_factor_enabled: boolean;
+  two_factor_secret?: string;
+  profile_image?: string;
+  bio?: string;
   role: 'user' | 'admin';
-  createdAt?: Date;
-  updatedAt?: Date;
+  last_login?: Date;
+  is_verified: boolean;
+  verification_token?: string;
+  reset_password_token?: string;
+  reset_password_expires?: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
+const userSchema = new Schema<IUser>({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password_hash: { type: String, required: true },
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+  two_factor_enabled: { type: Boolean, default: false },
+  two_factor_secret: String,
+  profile_image: String,
+  bio: String,
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  last_login: Date,
+  is_verified: { type: Boolean, default: false },
+  verification_token: String,
+  reset_password_token: String,
+  reset_password_expires: Date
+});
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
-
-class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: number;
-  public email!: string;
-  public password!: string;
-  public name!: string;
-  public role!: 'user' | 'admin';
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
-  public async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.password);
+userSchema.pre<IUser>('save', async function(next) {
+  if (this.isModified('password_hash')) {
+    this.password_hash = await bcrypt.hash(this.password_hash, 10);
   }
-}
+  next();
+});
 
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    email: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-      validate: {
-        isEmail: true,
-      },
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    role: {
-      type: DataTypes.ENUM('user', 'admin'),
-      defaultValue: 'user',
-    }
-  },
-  {
-    sequelize,
-    modelName: 'User',
-    timestamps: true,
-    hooks: {
-      beforeSave: async (user: User) => {
-        if (user.changed('password')) {
-          const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(user.password, salt);
-        }
-      }
-    }
-  }
-);
+userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password_hash);
+};
 
-export default User;
+export const User = model<IUser>('User', userSchema);
