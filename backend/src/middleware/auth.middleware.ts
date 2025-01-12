@@ -1,7 +1,7 @@
 // middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model';
+import { UserRepository } from '../services/database.service';
 import { ApiError } from '../utils/ApiError';
 import { config } from '../config/config';
 
@@ -16,24 +16,19 @@ declare global {
 export const authMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-
     if (!token) {
       throw new ApiError(401, 'Non authentifié');
     }
 
-    try {
-      const decoded = jwt.verify(token, config.jwt.secret) as { id: string };
-      const user = await User.findById(decoded.id);
+    const decoded = jwt.verify(token, config.jwt.secret) as { id: number };
+    const user = await UserRepository.findOne({ where: { id: decoded.id } });
 
-      if (!user) {
-        throw new ApiError(401, 'Utilisateur non trouvé');
-      }
-
-      req.user = user;
-      next();
-    } catch (error) {
-      throw new ApiError(401, 'Token invalide');
+    if (!user) {
+      throw new ApiError(401, 'Utilisateur non trouvé');
     }
+
+    req.user = user;
+    next();
   } catch (error) {
     next(error);
   }

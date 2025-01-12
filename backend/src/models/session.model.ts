@@ -1,10 +1,20 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from "typeorm"
+import { User } from "./user.model"
 
-const sessionSchema = new Schema({
-  user_idUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  jwt_token: { type: String, required: true },
-  created_at: { type: Date, default: Date.now },
-  expires_at: { type: Date, required: true }
-});
+@Entity()
+export class Session {
+  @PrimaryGeneratedColumn()
+  id!: number
 
-export const Session = model('Session', sessionSchema); 
+  @Column()
+  token!: string
+
+  @Column({ type: 'datetime' })
+  expires!: Date
+
+  @ManyToOne(() => User)
+  user!: User
+
+  @CreateDateColumn()
+  created_at!: Date
+}

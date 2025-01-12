@@ -1,14 +1,45 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from "typeorm"
+import { User } from "./user.model"
+import { Contribution } from "./contribution.model"
+import { Comment } from "./comment.model"
+import { Reward } from "./reward.model"
+import { Transaction } from "./transaction.model"
 
-const projectSchema = new Schema({
-  user_idUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  goal_amount: { type: Number, required: true },
-  current_amount: { type: Number, default: 0 },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
-  status: { type: String, enum: ['draft', 'active', 'completed', 'cancelled'], default: 'draft' }
-});
+@Entity()
+export class Project {
+  @PrimaryGeneratedColumn('increment')
+  id!: number
 
-export const Project = model('Project', projectSchema); 
+  @Column({ type: 'varchar' })
+  title!: string
+
+  @Column({ type: 'text' })
+  description!: string
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  funding_goal!: number
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  current_amount!: number
+
+  @Column()
+  end_date!: Date
+
+  @CreateDateColumn()
+  created_at!: Date
+
+  @ManyToOne(() => User, user => user.projects, { onDelete: 'CASCADE' })
+  creator!: User
+
+  @OneToMany(() => Contribution, contribution => contribution.project, { cascade: true })
+  contributions!: Contribution[]
+
+  @OneToMany(() => Comment, comment => comment.project)
+  comments!: Comment[]
+
+  @OneToMany(() => Reward, reward => reward.project)
+  rewards!: Reward[]
+
+  @OneToMany(() => Transaction, transaction => transaction.project)
+  transactions!: Transaction[]
+}

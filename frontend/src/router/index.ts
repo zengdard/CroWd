@@ -60,6 +60,34 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../components/pages/support/Contact.vue')
   },
   {
+    path: '/projects',
+    name: 'projects',
+    component: () => import('../components/pages/ProjectsListPage.vue')
+  },
+  {
+    path: '/projects/:id',
+    name: 'project-detail',
+    component: () => import('../components/pages/ProjectDetailPage.vue')
+  },
+  {
+    path: '/projects/new',
+    name: 'project-create',
+    component: () => import('../components/pages/ProjectCreatePage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/projects/:id/edit',
+    name: 'project-edit',
+    component: () => import('../components/pages/ProjectEditPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: () => import('../components/pages/CreatorDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
     component: () => import('../components/pages/NotFound.vue')

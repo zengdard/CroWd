@@ -1,10 +1,24 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm"
+import { User } from "./user.model"
+import { Project } from "./project.model"
 
-const contributionSchema = new Schema({
-  user_idUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  project_idProject: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
-  amount: { type: Number, required: true },
-  created_at: { type: Date, default: Date.now }
-});
+@Entity()
+export class Contribution {
+  @PrimaryGeneratedColumn()
+  id!: number
 
-export const Contribution = model('Contribution', contributionSchema); 
+  @Column("decimal", { precision: 10, scale: 2 })
+  amount!: number
+
+  @ManyToOne(() => User, user => user.contributions)
+  user!: User
+
+  @ManyToOne(() => Project, project => project.contributions)
+  project!: Project
+
+  @CreateDateColumn()
+  created_at!: Date
+
+  @Column({ default: "pending" })
+  status!: string
+}

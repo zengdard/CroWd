@@ -1,53 +1,73 @@
-// models/user.model.ts
-import { Schema, model, Document } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, OneToMany } from "typeorm"
+import { Project } from "./project.model"
+import { Contribution } from "./contribution.model"
+import { Transaction } from "./transaction.model"
+import * as bcrypt from "bcryptjs"
 
-export interface IUser extends Document {
-  username: string;
-  email: string;
-  password_hash: string;
-  created_at: Date;
-  updated_at: Date;
-  two_factor_enabled: boolean;
-  two_factor_secret?: string;
-  profile_image?: string;
-  bio?: string;
-  role: 'user' | 'admin';
-  last_login?: Date;
-  is_verified: boolean;
-  verification_token?: string;
-  reset_password_token?: string;
-  reset_password_expires?: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
-}
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn('increment')
+  id!: number
 
-const userSchema = new Schema<IUser>({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password_hash: { type: String, required: true },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
-  two_factor_enabled: { type: Boolean, default: false },
-  two_factor_secret: String,
-  profile_image: String,
-  bio: String,
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  last_login: Date,
-  is_verified: { type: Boolean, default: false },
-  verification_token: String,
-  reset_password_token: String,
-  reset_password_expires: Date
-});
+  @Column({ type: 'varchar', unique: true })
+  username!: string
 
-userSchema.pre<IUser>('save', async function(next) {
-  if (this.isModified('password_hash')) {
-    this.password_hash = await bcrypt.hash(this.password_hash, 10);
+  @Column({ type: 'varchar', unique: true })
+  email!: string
+
+  @Column({ type: 'varchar' })
+  password!: string
+
+  @Column({ type: 'varchar', nullable: true })
+  profile_image?: string
+
+  @Column({ default: false })
+  email_verified!: boolean
+
+  @Column({ default: false })
+  two_factor_enabled!: boolean
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  two_factor_secret?: string
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  reset_password_token?: string | null
+
+  @Column({ type: 'datetime', nullable: true })
+  reset_password_expires?: Date | null
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  verification_token?: string | null
+
+  @Column({ default: false })
+  is_verified!: boolean
+
+  @Column({ type: 'datetime', nullable: true })
+  last_login?: Date
+
+  @CreateDateColumn()
+  created_at!: Date
+
+  @Column({ type: 'datetime', nullable: true })
+  updated_at?: Date
+
+  @OneToMany(() => Project, project => project.creator)
+  projects!: Project[]
+
+  @OneToMany(() => Contribution, contribution => contribution.user)
+  contributions!: Contribution[]
+
+  @OneToMany(() => Transaction, transaction => transaction.user)
+  transactions!: Transaction[]
+
+  @BeforeInsert()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10)
+    }
   }
-  next();
-});
 
-userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password_hash);
-};
-
-export const User = model<IUser>('User', userSchema);
+  async comparePassword(candidatePassword: string): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password)
+  }
+}

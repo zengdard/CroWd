@@ -1,9 +1,26 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm"
+import { Project } from "./project.model"
 
-const rewardSchema = new Schema({
-  project_idProject: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
-  description: { type: String, required: true },
-  amount_required: { type: Number, required: true }
-});
+@Entity()
+export class Reward {
+  @PrimaryGeneratedColumn()
+  id!: number
 
-export const Reward = model('Reward', rewardSchema); 
+  @Column()
+  title!: string
+
+  @Column("text")
+  description!: string
+
+  @Column("decimal", { precision: 10, scale: 2 })
+  minimum_amount!: number
+
+  @Column({ nullable: true })
+  estimated_delivery?: Date
+
+  @ManyToOne(() => Project, project => project.rewards)
+  project!: Project
+
+  @CreateDateColumn()
+  created_at!: Date
+}

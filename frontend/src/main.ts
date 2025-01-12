@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, nextTick } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
@@ -11,8 +11,11 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
-    
-const authStore = useAuthStore()
-authStore.init()
 
 app.mount('#app')
+
+// Wait for Vue to be ready before initializing auth
+nextTick(() => {
+  const authStore = useAuthStore()
+  authStore.init()
+})

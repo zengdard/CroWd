@@ -80,103 +80,136 @@ onUnmounted(() => {
 
 <style scoped>
 .header {
- background: white;
- border-bottom: 1px solid var(--color-border);
- padding: 1rem 0;
- position: sticky;
- top: 0;
- z-index: 100;
+  background: #111827;
+  border-bottom: 1px solid #374151;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .container {
- display: flex;
- align-items: center;
- justify-content: space-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo {
- display: flex;
- align-items: center;
- text-decoration: none;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
 }
 
 .crab {
- font-size: 1.75rem;
- margin-right: 0.5rem;
+  font-size: 1.75rem;
+  margin-right: 0.5rem;
 }
 
 .brand {
- font-size: 1.25rem;
- font-weight: 700;
- color: var(--color-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ef4444;
 }
 
 .nav {
- display: flex;
- gap: 2rem;
+  display: flex;
+  gap: 2rem;
 }
 
 .nav a {
- color: var(--color-text);
- text-decoration: none;
- transition: color 0.2s;
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
 .nav a:hover {
- color: var(--color-primary);
+  color: #ef4444;
 }
 
 .auth-section {
- display: flex;
- gap: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.auth-section .btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #dc2626;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid #374151;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-menu {
- position: relative;
+  position: relative;
 }
 
 .avatar {
- width: 2.5rem;
- height: 2.5rem;
- border-radius: 50%;
- cursor: pointer;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #374151;
 }
 
 .dropdown-menu {
- position: absolute;
- top: 100%;
- right: 0;
- margin-top: 0.5rem;
- background: white;
- border: 1px solid var(--color-border);
- border-radius: var(--border-radius);
- padding: 0.5rem;
- min-width: 200px;
- box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .dropdown-menu a,
 .dropdown-menu button {
- display: block;
- padding: 0.5rem 1rem;
- width: 100%;
- text-align: left;
- background: none;
- border: none;
- color: var(--color-text);
- text-decoration: none;
- cursor: pointer;
- transition: background-color 0.2s;
+  display: block;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .dropdown-menu a:hover,
 .dropdown-menu button:hover {
- background-color: var(--color-background-soft);
+  background-color: #374151;
+  color: #ef4444;
 }
 
 @media (max-width: 768px) {
- .nav {
-   display: none;
- }
+  .nav {
+    display: none;
+  }
 }
 </style>

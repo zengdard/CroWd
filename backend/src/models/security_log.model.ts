@@ -1,9 +1,23 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from "typeorm"
+import { User } from "./user.model"
 
-const securityLogSchema = new Schema({
-  user_idUser: { type: Schema.Types.ObjectId, ref: 'User' },
-  event_type: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now }
-});
+@Entity()
+export class SecurityLog {
+  @PrimaryGeneratedColumn()
+  id!: number
 
-export const SecurityLog = model('SecurityLog', securityLogSchema); 
+  @Column()
+  action!: string
+
+  @Column()
+  ip_address!: string
+
+  @Column({ nullable: true })
+  user_agent?: string
+
+  @ManyToOne(() => User)
+  user!: User
+
+  @CreateDateColumn()
+  created_at!: Date
+}

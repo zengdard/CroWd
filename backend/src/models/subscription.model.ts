@@ -1,23 +1,32 @@
 // models/subscription.model.ts
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm"
+import { User } from "./user.model"
+import { Project } from "./project.model"
 
-export interface ISubscription {
-  currentPeriodEnd: Date;
-  status: 'active' | 'cancelled' | 'failed' | 'past_due';
-  stripeSubscriptionId?: string;
+@Entity()
+export class Subscription {
+  @PrimaryGeneratedColumn()
+  id!: number
+
+  subscriber!: User
+
+  project!: Project
+
+  @Column()
+  stripeSubscriptionId!: string
+
+  @Column()
+  status!: string
+
+  @Column({ type: 'datetime' })
+  currentPeriodEnd!: Date
+
+  @Column({ default: true })
+  active!: boolean
+
+  @CreateDateColumn()
+  created_at!: Date
 }
-
-const subscriptionSchema = new Schema<ISubscription>({
-  currentPeriodEnd: { type: Date, required: true },
-  status: {
-    type: String,
-    enum: ['active', 'cancelled', 'failed', 'past_due'],
-    required: true
-  },
-  stripeSubscriptionId: String
-});
-
-export const Subscription = model<ISubscription>('Subscription', subscriptionSchema);
 
 // models/Price.ts
 export interface Price {

@@ -1,6 +1,5 @@
 // controllers/auth.controller.ts
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/user.model';
 import jwt from 'jsonwebtoken';
 import { generateTOTP, verifyTOTP } from '../utils/totp';
 import { sendVerificationEmail } from '../utils/email';
@@ -8,14 +7,19 @@ import { ApiError } from '../utils/ApiError';
 import { config } from '../config/config';
 import fs from 'fs/promises';
 import path from 'path';
+import { UserRepository } from '../services/database.service';
+import { Not } from 'typeorm';
 
 export const authController = {
   // Inscription
   register: async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
     try {
-      const { username, email, password } = req.body;
-      const existingUser = await User.findOne({ 
-        $or: [{ email }, { username }] 
+      const userData = req.body;
+      const existingUser = await UserRepository.findOne({ 
+        where: [
+          { email: userData.email },
+          { username: userData.username }
+        ]
       });
       
       if (existingUser) {
@@ -23,15 +27,14 @@ export const authController = {
       }
 
       const verificationToken = Math.random().toString(36).substring(2);
-      await User.create({
-        username,
-        email,
-        password_hash: password,
+      const user = UserRepository.create({
+        ...userData,
         verification_token: verificationToken
       });
+      await UserRepository.save(user);
 
-      if (email) {
-        await sendVerificationEmail(email, verificationToken);
+      if (userData.email) {
+        await sendVerificationEmail(userData.email, verificationToken);
       }
 
       return res.status(201).json({
@@ -49,7 +52,7 @@ export const authController = {
       const { email, password, totpCode } = req.body;
 
       // Trouver l'utilisateur
-      const user = await User.findOne({ email });
+      const user = await UserRepository.findOne({ where: { email } });
       if (!user) {
         throw new ApiError(401, 'Email ou mot de passe incorrect');
       }
@@ -78,11 +81,11 @@ export const authController = {
 
       // Mettre à jour la dernière connexion
       user.last_login = new Date();
-      await user.save();
+      await UserRepository.save(user);
 
       // Générer le token JWT
       const token = jwt.sign(
-        { id: user._id },
+        { id: user.id }, // Changed from _id to id
         config.jwt.secret,
         { expiresIn: config.jwt.expiresIn }
       );
@@ -90,10 +93,10 @@ export const authController = {
       return res.json({
         token,
         user: {
-          id: user._id,
+          id: user.id, // Changed from _id to id
           username: user.username,
-          email: user.email,
-          role: user.role
+          email: user.email
+          // Removed role as it's not in the User model
         }
       });
     } catch (error) {
@@ -105,7 +108,7 @@ export const authController = {
   // Activer la 2FA
   enable2FA: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = await User.findById(req.user?.id);
+      const user = await UserRepository.findOne({ where: { id: req.user?.id } });
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
       }
@@ -113,7 +116,7 @@ export const authController = {
       const secret = await generateTOTP();
       user.two_factor_secret = secret.base32;
       user.two_factor_enabled = true;
-      await user.save();
+      await UserRepository.save(user);
 
       res.json({
         secret: secret.base32,
@@ -127,17 +130,19 @@ export const authController = {
   // Mettre à jour le profil
   updateProfile: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { bio, username } = req.body;
-      const user = await User.findById(req.user.id);
+      const { username } = req.body;
+      const user = await UserRepository.findOne({ where: { id: req.user.id } });
       
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
       }
 
       if (username) {
-        const existingUser = await User.findOne({ 
-          username, 
-          _id: { $ne: user._id } 
+        const existingUser = await UserRepository.findOne({ 
+          where: { 
+            username,
+            id: Not(user.id)
+          }
         });
         if (existingUser) {
           throw new ApiError(400, 'Ce nom d\'utilisateur est déjà pris');
@@ -145,11 +150,8 @@ export const authController = {
         user.username = username;
       }
 
-      if (bio) user.bio = bio;
       user.updated_at = new Date();
-      
-      await user.save();
-
+      await UserRepository.save(user);
       res.json(user);
     } catch (error) {
       next(error);
@@ -163,7 +165,7 @@ export const authController = {
         throw new ApiError(400, 'Aucune image fournie');
       }
 
-      const user = await User.findById(req.user?.id);
+      const user = await UserRepository.findOne({ where: { id: req.user?.id } });
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
       }
@@ -173,7 +175,7 @@ export const authController = {
       }
 
       user.profile_image = req.file.filename;
-      await user.save();
+      await UserRepository.save(user);
 
       res.json({
         message: 'Image de profil mise à jour',
@@ -187,7 +189,7 @@ export const authController = {
   forgotPassword: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email } = req.body;
-      const user = await User.findOne({ email });
+      const user = await UserRepository.findOne({ where: { email } });
       
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
@@ -197,7 +199,7 @@ export const authController = {
       const resetToken = Math.random().toString(36).substring(2);
       user.reset_password_token = resetToken;
       user.reset_password_expires = new Date(Date.now() + 3600000); // 1 heure
-      await user.save();
+      await UserRepository.save(user);
 
       // Envoyer l'email
       // TODO: Implémenter l'envoi d'email de réinitialisation
@@ -211,19 +213,22 @@ export const authController = {
   resetPassword: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { token, password } = req.body;
-      const user = await User.findOne({
-        reset_password_token: token,
-        reset_password_expires: { $gt: Date.now() }
+      const now = new Date();
+      const user = await UserRepository.findOne({
+        where: {
+          reset_password_token: token,
+          reset_password_expires: Not(now)
+        }
       });
 
       if (!user) {
         throw new ApiError(400, 'Token invalide ou expiré');
       }
 
-      user.password_hash = password;
-      user.reset_password_token = undefined;
-      user.reset_password_expires = undefined;
-      await user.save();
+      user.password = password;
+      user.reset_password_token = null;
+      user.reset_password_expires = null;
+      await UserRepository.save(user);
 
       res.json({ message: 'Mot de passe mis à jour' });
     } catch (error) {
@@ -234,7 +239,7 @@ export const authController = {
   verifyEmail: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { token } = req.params;
-      const user = await User.findOne({ verification_token: token });
+      const user = await UserRepository.findOne({ where: { verification_token: token } });
 
       if (!user) {
         throw new ApiError(400, 'Token de vérification invalide');
@@ -242,7 +247,7 @@ export const authController = {
 
       user.is_verified = true;
       user.verification_token = undefined;
-      await user.save();
+      await UserRepository.save(user);
 
       res.json({ message: 'Email vérifié avec succès' });
     } catch (error) {
@@ -252,7 +257,10 @@ export const authController = {
 
   getCurrentUser: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = await User.findById(req.user?.id).select('-password_hash');
+      const user = await UserRepository.findOne({ 
+        where: { id: req.user?.id },
+        select: { password: false }
+      });
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
       }
@@ -265,7 +273,7 @@ export const authController = {
   changePassword: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      const user = await User.findById(req.user?.id);
+      const user = await UserRepository.findOne({ where: { id: req.user?.id } });
 
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
@@ -276,8 +284,8 @@ export const authController = {
         throw new ApiError(400, 'Mot de passe actuel incorrect');
       }
 
-      user.password_hash = newPassword;
-      await user.save();
+      user.password = newPassword; // Changed from password_hash to password
+      await UserRepository.save(user);
 
       res.json({ message: 'Mot de passe mis à jour' });
     } catch (error) {
@@ -288,7 +296,7 @@ export const authController = {
   verify2FA: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { totpCode } = req.body;
-      const user = await User.findById(req.user?.id);
+      const user = await UserRepository.findOne({ where: { id: req.user?.id } });
 
       if (!user || !user.two_factor_secret) {
         throw new ApiError(400, '2FA non configuré');
@@ -307,14 +315,14 @@ export const authController = {
 
   disable2FA: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = await User.findById(req.user?.id);
+      const user = await UserRepository.findOne({ where: { id: req.user?.id } });
       if (!user) {
         throw new ApiError(404, 'Utilisateur non trouvé');
       }
 
       user.two_factor_enabled = false;
       user.two_factor_secret = undefined;
-      await user.save();
+      await UserRepository.save(user);
 
       res.json({ message: '2FA désactivé' });
     } catch (error) {

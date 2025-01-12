@@ -1,10 +1,30 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from "typeorm";
+import { User } from "./user.model";
+import { Project } from "./project.model";
 
-const transactionSchema = new Schema({
-  contribution_idContribution: { type: Schema.Types.ObjectId, ref: 'Contribution', required: true },
-  status: { type: String, enum: ['pending', 'completed', 'failed'], required: true },
-  payment_method: { type: String, required: true },
-  created_at: { type: Date, default: Date.now }
-});
+@Entity()
+export class Transaction {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-export const Transaction = model('Transaction', transactionSchema); 
+  @Column("decimal", { precision: 10, scale: 2 })
+  amount!: number;
+
+  @Column()
+  status!: string;
+
+  @Column({ nullable: true })
+  payment_method?: string;
+
+  @Column({ nullable: true })
+  transaction_id?: string;
+
+  @ManyToOne(() => User, (user: User) => user.transactions)
+  user!: User;
+
+  @ManyToOne(() => Project, (project: Project) => project.transactions)
+  project!: Project;
+
+  @CreateDateColumn()
+  created_at!: Date;
+}

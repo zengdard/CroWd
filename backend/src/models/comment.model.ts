@@ -1,10 +1,21 @@
-import { Schema, model } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm"
+import { User } from "./user.model"
+import { Project } from "./project.model"
 
-const commentSchema = new Schema({
-  user_idUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  project_idProject: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
-  content: { type: String, required: true },
-  created_at: { type: Date, default: Date.now }
-});
+@Entity()
+export class Comment {
+  @PrimaryGeneratedColumn()
+  id!: number
 
-export const Comment = model('Comment', commentSchema); 
+  @Column("text")
+  content!: string
+
+  @ManyToOne(() => User)
+  author!: User
+
+  @ManyToOne(() => Project, project => project.comments)
+  project!: Project
+
+  @CreateDateColumn()
+  created_at!: Date
+}

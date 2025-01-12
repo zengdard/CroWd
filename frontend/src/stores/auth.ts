@@ -1,13 +1,12 @@
 // frontend/src/stores/auth.ts
 import { defineStore } from 'pinia'
-import api from '@/utils/axios'
+import { authService, type LoginCredentials, type RegisterData } from '@/services/auth.service'
+import router from '@/router'
 
 interface User {
-  id: string
-  username: string
+  id: number
   email: string
-  profile_image?: string
-  role: string
+  username: string
 }
 
 interface AuthState {
@@ -20,72 +19,51 @@ export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
     token: localStorage.getItem('token'),
-    isAuthenticated: false
+    isAuthenticated: !!localStorage.getItem('token')
   }),
 
   actions: {
-    init() {
-      const token = localStorage.getItem('token');
-      if (token) {
-        this.token = token;
-        this.isAuthenticated = true;
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        this.fetchUser();
+    async login(credentials: LoginCredentials) {
+      const { user, token } = await authService.login(credentials)
+      this.setAuthData(user, token)
+      await router.push('/')
+    },
+
+    async register(data: RegisterData) {
+      const { user, token } = await authService.register(data)
+      this.setAuthData(user, token)
+      await router.push('/')
+    },
+
+    async logout() {
+      await authService.logout()
+      this.clearAuthData()
+      await router.push('/login')
+    },
+
+    async fetchCurrentUser() {
+      if (this.token) {
+        try {
+          const user = await authService.getCurrentUser()
+          this.user = user
+        } catch {
+          this.clearAuthData()
+        }
       }
     },
 
-    async fetchUser() {
-      try {
-        const response = await api.get('/api/auth/me');
-        this.user = response.data;
-      } catch (error) {
-        this.logout();
-      }
+    setAuthData(user: User, token: string) {
+      this.user = user
+      this.token = token
+      this.isAuthenticated = true
+      localStorage.setItem('token', token)
     },
 
-    async login(credentials: any) {
-      try {
-        const response = await api.post('/auth/login', credentials);
-        this.setToken(response.data.token);
-        this.setUser(response.data.user);
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    async register(userData: any) {
-      try {
-        const response = await api.post('/auth/register', userData);
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    setUser(user: any) {
-      this.user = user;
-      this.isAuthenticated = true;
-    },
-
-    setToken(token: string) {
-      this.token = token;
-      localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    },
-
-    updateUser(userData: Partial<User>) {
-      if (this.user) {
-        this.user = { ...this.user, ...userData }
-      }
-    },
-
-    logout() {
-      this.user = null;
-      this.token = null;
-      this.isAuthenticated = false;
-      localStorage.removeItem('token');
-      delete api.defaults.headers.common['Authorization'];
+    clearAuthData() {
+      this.user = null
+      this.token = null
+      this.isAuthenticated = false
+      localStorage.removeItem('token')
     }
   }
 })

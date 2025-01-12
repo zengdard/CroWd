@@ -5,6 +5,6 @@ import { authMiddleware } from '../middleware/auth.middleware';
 const router = Router();
 
 router.post('/', authMiddleware, contributionController.create);
-router.get('/project/:projectId', contributionController.getByProject);
+router.get('/project/:projectId', contributionController.getAll);
 
-export default router; 
+export default router;

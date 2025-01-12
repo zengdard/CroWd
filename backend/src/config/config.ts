@@ -4,7 +4,11 @@ dotenv.config();
 
 interface Config {
   db: {
-    uri: string;
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    database: string;
   };
   jwt: {
     secret: string;
@@ -26,7 +30,11 @@ interface Config {
 
 export const config: Config = {
   db: {
-    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/crowdfunding'
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306'),
+    username: process.env.DB_USER || 'admin',
+    password: process.env.DB_PASSWORD || 'your_secure_password',
+    database: process.env.DB_NAME || 'crowdfunding_db'
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',

@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   frontend:
     build:
@@ -9,19 +11,23 @@ services:
       - backend
     networks:
       - app-network
+    restart: unless-stopped
+    environment:
+      - BACKEND_URL=http://localhost:3000
 
   backend:
-    image: node:20-alpine
     build:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+      - CORS_ORIGIN=http://localhost
       - DB_HOST=mariadb
-      - DB_USER=admin
-      - DB_PASSWORD=votre_mot_de_passe
-      - DB_NAME=latex_formula
-      - JWT_SECRET=${JWT_SECRET}
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=crowdfunding
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key}
     ports:
       - "3000:3000"
     depends_on:
@@ -29,24 +35,40 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   mariadb:
-    image: mariadb:latest
+    image: mariadb:11.6
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: latex_formula
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: votre_mot_de_passe
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: crowdfunding
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_HOST: '%'
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_CHARACTER_SET_SERVER: utf8mb4
+      MARIADB_COLLATION_SERVER: utf8mb4_unicode_ci
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mariadb", "-u", "root", "-proot_password", "-e", "SELECT 1;"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
 
@@ -56,3 +78,4 @@ networks:
 
 volumes:
   mariadb_data:
+  backend_node_modules:

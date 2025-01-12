@@ -1,41 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
-import { Contribution } from '../models/contribution.model';
-import { Project } from '../models/project.model';
+import { ContributionRepository, ProjectRepository } from '../services/database.service';
+
+interface ContributionData {
+  amount: number;
+  project: { id: number };
+  user: { id: number };
+}
 
 export const contributionController = {
-  // Créer une nouvelle contribution
   create: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { project_idProject, amount } = req.body;
-      
-      // Créer la contribution
-      const contribution = await Contribution.create({
-        user_idUser: req.user.id,
-        project_idProject,
-        amount
+      const contributionData: ContributionData = req.body;
+      const newContribution = ContributionRepository.create({
+        amount: contributionData.amount,
+        project: { id: contributionData.project.id },
+        user: { id: contributionData.user.id }
       });
+      
+      const saved = await ContributionRepository.save(newContribution);
 
-      // Mettre à jour le montant actuel du projet
-      await Project.findByIdAndUpdate(
-        project_idProject,
-        { $inc: { current_amount: amount } }
-      );
+      if (saved.project?.id) {
+        await ProjectRepository.createQueryBuilder()
+          .update()
+          .set({
+            current_amount: () => `current_amount + :amount`,
+          })
+          .where("id = :id", { 
+            id: saved.project.id, 
+            amount: saved.amount 
+          })
+          .execute();
+      }
 
-      res.status(201).json(contribution);
+      res.status(201).json(saved);
     } catch (error) {
       next(error);
     }
   },
 
-  // Obtenir toutes les contributions d'un projet
-  getByProject: async (req: Request, res: Response, next: NextFunction) => {
+  getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const contributions = await Contribution.find({
-        project_idProject: req.params.projectId
-      }).populate('user_idUser');
+      const projectId = parseInt(req.params.projectId);
+      const contributions = await ContributionRepository.find({
+        where: { project: { id: projectId } },
+        relations: ['user']
+      });
       res.json(contributions);
     } catch (error) {
       next(error);
     }
   }
-}; 
+};
