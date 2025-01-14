@@ -26,13 +26,14 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
-      - DB_NAME=crowdfunding
+      - DB_NAME=crowd
       - JWT_SECRET=${JWT_SECRET:-your-secret-key}
     ports:
       - "3000:3000"
     depends_on:
       mariadb:
         condition: service_healthy
+    command: sh -c "npx wait-on tcp:mariadb:3306 && npm start"
     networks:
       - app-network
     volumes:
@@ -52,7 +53,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: crowdfunding
+      MYSQL_DATABASE: crowd
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_ROOT_HOST: '%'
@@ -61,14 +62,15 @@ services:
       MARIADB_COLLATION_SERVER: utf8mb4_unicode_ci
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./backend/init-scripts:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
-      interval: 5s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
+      test: ["CMD", "mariadb", "-uroot", "-ppassword", "-e", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - app-network
 
@@ -78,4 +80,6 @@ networks:
 
 volumes:
   mariadb_data:
+    driver: local
   backend_node_modules:
+    driver: local

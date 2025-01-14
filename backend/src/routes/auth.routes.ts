@@ -7,15 +7,16 @@ import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// Routes publiques
+// Public routes - these should be above the authMiddleware
 router.post('/register', validateRequest(registerSchema), authController.register);
 router.post('/login', validateRequest(loginSchema), authController.login);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 router.get('/verify-email/:token', authController.verifyEmail);
 
-// Routes protégées
-router.use(authMiddleware);
+// Protected routes - these should be below the authMiddleware
+router.use(authMiddleware); // Apply auth middleware only to routes below this line
+
 router.get('/me', authController.getCurrentUser);
 router.put('/profile', authController.updateProfile);
 router.post('/change-password', authController.changePassword);

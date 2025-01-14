@@ -3,7 +3,8 @@ FROM node:18.18-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+# Ajouter --legacy-peer-deps pour éviter les problèmes de compatibilité
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build

@@ -34,7 +34,7 @@ export const config: Config = {
     port: parseInt(process.env.DB_PORT || '3306'),
     username: process.env.DB_USER || 'admin',
     password: process.env.DB_PASSWORD || 'your_secure_password',
-    database: process.env.DB_NAME || 'crowdfunding_db'
+    database: process.env.DB_NAME || 'crowd'
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',

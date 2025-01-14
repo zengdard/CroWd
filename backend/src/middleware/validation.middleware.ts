@@ -1,43 +1,44 @@
-// middleware/validation.middleware.ts
 import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
+import { AnyZodObject, ZodError, z } from 'zod';
+import { registerSchema, loginSchema } from '../validations/auth.validation';
 
-export const validateRequest = (schema: z.ZodSchema) => {
-  return async (req: Request, _res: Response, next: NextFunction) => {
+export const validateRequest = (schema: AnyZodObject) => 
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.parseAsync(req.body);
+      const validatedData = await schema.parseAsync({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
+      req.body = validatedData.body;
       next();
     } catch (error) {
-      next(error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+      return res.status(500).json({
+        status: 'error',
+        message: 'Internal server error'
+      });
     }
   };
-};
 
-// Schémas de validation
-export const registerSchema = z.object({
-  body: z.object({
-    username: z.string().min(3).max(30),
-    email: z.string().email(),
-    password: z.string().min(8)
-  })
-});
-
-export const loginSchema = z.object({
-  body: z.object({
-    email: z.string().email(),
-    password: z.string(),
-    totpCode: z.string().optional()
-  })
-});
-
-export const formulaSchema = z.object({
+// Formula validation schema
+const formulaSchema = z.object({
   body: z.object({
     title: z.string().min(1),
     latex: z.string().min(1)
   })
 });
 
-// Export des middlewares de validation
+// Export validation middleware instances
 export const validateFormula = validateRequest(formulaSchema);
 export const validateRegister = validateRequest(registerSchema);
 export const validateLogin = validateRequest(loginSchema);
+
+// Re-export schemas for use elsewhere
+export { registerSchema, loginSchema };

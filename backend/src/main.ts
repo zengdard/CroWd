@@ -15,9 +15,14 @@ import { configureSecurityMiddleware } from './middleware/security.middleware';
 
 const app = express();
 
-// Configuration CORS
+// Body parsing middleware - move before routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Configuration CORS - move this before other middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost',
+  origin: ['http://localhost', 'http://localhost:80'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
@@ -25,21 +30,25 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-// Ensure OPTIONS requests are handled properly
+// Handle preflight requests
 app.options('*', cors());
-
-// Autres middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 // Configuration de la sécurité
 configureSecurityMiddleware(app);
 
 // Routes
+// Support both /api prefix and direct paths for backwards compatibility
+app.use('/auth', authRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/projects', projectRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/contributions', contributionRoutes);
 app.use('/api/contributions', contributionRoutes);
+
+// Add health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 // Error handling
 app.use(errorHandler);

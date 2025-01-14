@@ -1,24 +1,29 @@
 import { z } from 'zod';
 
+// Define the schemas
 export const registerSchema = z.object({
   body: z.object({
-    username: z.string().min(3).max(30),
-    email: z.string().email(),
-    password: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-  })
+    email: z.string().email('Invalid email format'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    username: z.string().min(3, 'Username must be at least 3 characters'),
+  }),
 });
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email(),
+    email: z.string().email('Invalid email format'),
     password: z.string(),
-    totpCode: z.string().optional()
-  })
+  }),
 });
 
-export const updateProfileSchema = z.object({
-  body: z.object({
-    username: z.string().min(3).max(30).optional(),
-    bio: z.string().max(500).optional()
-  })
-}); 
+// Define input types from schemas
+export type RegisterInput = {
+  email: string;
+  password: string;
+  username: string;
+};
+
+export type LoginInput = {
+  email: string;
+  password: string;
+};

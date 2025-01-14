@@ -9,12 +9,14 @@ import fs from 'fs/promises';
 import path from 'path';
 import { UserRepository } from '../services/database.service';
 import { Not } from 'typeorm';
+import { RegisterInput, LoginInput } from '../validations/auth.validation';
 
-export const authController = {
-  // Inscription
-  register: async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
+class AuthController {
+  async register(req: Request, res: Response) {
     try {
-      const userData = req.body;
+      const userData = req.body as RegisterInput;
+      console.log('Registration attempt:', userData); // Debug log
+
       const existingUser = await UserRepository.findOne({ 
         where: [
           { email: userData.email },
@@ -37,17 +39,28 @@ export const authController = {
         await sendVerificationEmail(userData.email, verificationToken);
       }
 
-      return res.status(201).json({
-        message: 'Inscription réussie. Veuillez vérifier votre email.'
+      res.status(201).json({
+        status: 'success',
+        message: 'User registered successfully',
+        data: {/* user data */}
       });
     } catch (error) {
-      next(error);
-      return;
+      if (error instanceof ApiError) {
+        return res.status(error.statusCode).json({
+          status: 'error',
+          message: error.message
+        });
+      }
+      console.error('Registration error:', error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Internal Server Error'
+      });
     }
-  },
+  }
 
   // Connexion
-  login: async (req: Request, res: Response, next: NextFunction) => {
+  async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password, totpCode } = req.body;
 
@@ -103,10 +116,10 @@ export const authController = {
       next(error);
       return;
     }
-  },
+  }
 
   // Activer la 2FA
-  enable2FA: async (req: Request, res: Response, next: NextFunction) => {
+  async enable2FA(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await UserRepository.findOne({ where: { id: req.user?.id } });
       if (!user) {
@@ -125,10 +138,10 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
   // Mettre à jour le profil
-  updateProfile: async (req: Request, res: Response, next: NextFunction) => {
+  async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const { username } = req.body;
       const user = await UserRepository.findOne({ where: { id: req.user.id } });
@@ -156,10 +169,10 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
   // Mettre à jour l'image de profil
-  updateProfileImage: async (req: Request, res: Response, next: NextFunction) => {
+  async updateProfileImage(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.file) {
         throw new ApiError(400, 'Aucune image fournie');
@@ -184,9 +197,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  forgotPassword: async (req: Request, res: Response, next: NextFunction) => {
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
       const user = await UserRepository.findOne({ where: { email } });
@@ -208,9 +221,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  resetPassword: async (req: Request, res: Response, next: NextFunction) => {
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { token, password } = req.body;
       const now = new Date();
@@ -234,9 +247,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  verifyEmail: async (req: Request, res: Response, next: NextFunction) => {
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
     try {
       const { token } = req.params;
       const user = await UserRepository.findOne({ where: { verification_token: token } });
@@ -253,9 +266,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  getCurrentUser: async (req: Request, res: Response, next: NextFunction) => {
+  async getCurrentUser(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await UserRepository.findOne({ 
         where: { id: req.user?.id },
@@ -268,9 +281,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  changePassword: async (req: Request, res: Response, next: NextFunction) => {
+  async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { currentPassword, newPassword } = req.body;
       const user = await UserRepository.findOne({ where: { id: req.user?.id } });
@@ -291,9 +304,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  verify2FA: async (req: Request, res: Response, next: NextFunction) => {
+  async verify2FA(req: Request, res: Response, next: NextFunction) {
     try {
       const { totpCode } = req.body;
       const user = await UserRepository.findOne({ where: { id: req.user?.id } });
@@ -311,9 +324,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  disable2FA: async (req: Request, res: Response, next: NextFunction) => {
+  async disable2FA(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await UserRepository.findOne({ where: { id: req.user?.id } });
       if (!user) {
@@ -328,9 +341,9 @@ export const authController = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-  logout: async (_req: Request, res: Response, next: NextFunction) => {
+  async logout(_req: Request, res: Response, next: NextFunction) {
     try {
       res.clearCookie('token');
       res.json({ message: 'Déconnecté avec succès' });
@@ -338,4 +351,6 @@ export const authController = {
       next(error);
     }
   }
-};
+}
+
+export const authController = new AuthController();
