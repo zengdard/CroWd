@@ -1,31 +1,33 @@
 // models/subscription.model.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from "typeorm"
 import { User } from "./user.model"
 import { Project } from "./project.model"
 
 @Entity()
 export class Subscription {
   @PrimaryGeneratedColumn()
-  id!: number
+  id!: number;
 
-  subscriber!: User
+  @ManyToOne(() => User)
+  subscriber!: User;
 
-  project!: Project
+  @ManyToOne(() => Project)
+  project!: Project;
 
-  @Column()
-  stripeSubscriptionId!: string
+  @Column({ type: "varchar", length: 255 })
+  stripeSubscriptionId!: string;
 
-  @Column()
-  status!: string
+  @Column({ type: "varchar", length: 50 })
+  status!: string;
 
-  @Column({ type: 'datetime' })
-  currentPeriodEnd!: Date
+  @Column({ type: "datetime" })
+  currentPeriodEnd!: Date;
 
-  @Column({ default: true })
-  active!: boolean
+  @Column({ type: "boolean", default: true })
+  active!: boolean;
 
-  @CreateDateColumn()
-  created_at!: Date
+  @CreateDateColumn({ type: "datetime" })
+  created_at!: Date;
 }
 
 // models/Price.ts

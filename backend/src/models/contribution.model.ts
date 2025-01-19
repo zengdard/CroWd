@@ -19,6 +19,6 @@ export class Contribution {
   @CreateDateColumn()
   created_at!: Date
 
-  @Column({ default: "pending" })
+  @Column("varchar", { default: "pending" })
   status!: string
 }

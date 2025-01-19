@@ -4,20 +4,20 @@ import { User } from "./user.model"
 @Entity()
 export class SecurityLog {
   @PrimaryGeneratedColumn()
-  id!: number
+  id!: number;
 
-  @Column()
-  action!: string
+  @Column({ type: "varchar", length: 255 })
+  action!: string;
 
-  @Column()
-  ip_address!: string
+  @Column({ type: "varchar", length: 45 })
+  ip_address!: string;
 
-  @Column({ nullable: true })
-  user_agent?: string
+  @Column({ type: "varchar", length: 255, nullable: true })
+  user_agent?: string;
 
   @ManyToOne(() => User)
-  user!: User
+  user!: User;
 
-  @CreateDateColumn()
-  created_at!: Date
+  @CreateDateColumn({ type: "datetime" })
+  created_at!: Date;
 }

@@ -6,35 +6,15 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src')
     }
   },
   build: {
     outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: true,
-    target: 'es2020',
-    minify: 'esbuild'
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      target: 'es2020'
-    }
+    assetsDir: 'assets'
   },
   server: {
     port: 80,
-    host: true,
-    proxy: {
-      '^/auth/.*': {
-        target: 'http://backend:3000',
-        changeOrigin: true,
-        secure: false
-      },
-      '^/api/.*': {
-        target: 'http://backend:3000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
+    host: true
   }
 })

@@ -5,17 +5,17 @@ import { Project } from "./project.model"
 @Entity()
 export class Comment {
   @PrimaryGeneratedColumn()
-  id!: number
+  id!: number;
 
-  @Column("text")
-  content!: string
+  @Column({ type: "text" })
+  content!: string;
 
-  @ManyToOne(() => User)
-  author!: User
+  @ManyToOne(() => User, { nullable: false })
+  author!: User;
 
-  @ManyToOne(() => Project, project => project.comments)
-  project!: Project
+  @ManyToOne(() => Project, project => project.comments, { nullable: false })
+  project!: Project;
 
-  @CreateDateColumn()
-  created_at!: Date
+  @CreateDateColumn({ type: "datetime" })
+  created_at!: Date;
 }

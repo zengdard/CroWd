@@ -3,16 +3,20 @@
   "version": "1.0.0",
   "description": "Backend for crowdfunding platform",
   "main": "dist/main.js",
+  "type": "module",
   "scripts": {
-    "prestart": "npm run build",
+    "dev": "vite",
+    "build": "vite build",
     "start": "node dist/main.js",
-    "dev": "ts-node-dev --transpile-only src/main.ts",
-    "build": "tsc",
-    "build:clean": "npm run clean && npm run build"
+    "preview": "vite preview",
+    "build:clean": "rm -rf dist && npm run build",
+    "install-types": "npm i --save-dev @types/express @types/cors @types/cookie-parser @types/jsonwebtoken @types/bcryptjs @types/multer @types/nodemailer @types/speakeasy @types/qrcode @types/csurf @types/express-session"
   },
   "dependencies": {
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -43,9 +47,9 @@
     "@types/express-session": "^1.17.10",
     "@types/jest": "^29.5.11",
     "@types/jsonwebtoken": "^9.0.5",
-    "@types/multer": "^1.4.12",
+    "@types/multer": "^1.4.11",
     "@types/node": "^20.10.4",
-    "@types/nodemailer": "^6.4.0",
+    "@types/nodemailer": "^6.4.14",
     "@types/otplib": "^10.0.0",
     "@types/qrcode": "^1.5.5",
     "@types/speakeasy": "^2.0.7",
@@ -62,7 +66,9 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^4.5.1",
+    "vite-plugin-node": "^3.1.0"
   },
   "engines": {
     "node": ">=16.0.0"

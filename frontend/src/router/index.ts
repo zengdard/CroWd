@@ -88,6 +88,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('../components/pages/SettingsPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
     component: () => import('../components/pages/NotFound.vue')
@@ -99,14 +105,15 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  
+// Commentez ou supprimez temporairement le guard de navigation
+router.beforeEach((to) => {
+  // Commentez tout le bloc de vérification
+  /*
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } });
-  } else {
-    next();
+    return { name: 'login' }
   }
-});
+  */
+  return true
+})
 
 export default router;

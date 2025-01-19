@@ -1,30 +1,36 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from "typeorm";
-import { User } from "./user.model";
-import { Project } from "./project.model";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm"
+import { User } from "./user.model"
+import { Project } from "./project.model"
 
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
-  id!: number;
+  id!: number
 
   @Column("decimal", { precision: 10, scale: 2 })
-  amount!: number;
+  amount!: number
 
-  @Column()
-  status!: string;
+  @Column("varchar", { length: 50 })
+  status!: string
 
-  @Column({ nullable: true })
-  payment_method?: string;
+  @Column("varchar", { length: 255 })
+  paymentMethod!: string
 
-  @Column({ nullable: true })
-  transaction_id?: string;
+  @Column("varchar", { length: 255, nullable: true })
+  transactionId?: string
 
-  @ManyToOne(() => User, (user: User) => user.transactions)
-  user!: User;
+  @ManyToOne(() => User)
+  user!: User
 
-  @ManyToOne(() => Project, (project: Project) => project.transactions)
-  project!: Project;
+  @ManyToOne(() => Project)
+  project!: Project
+
+  @Column("varchar", { length: 255, nullable: true })
+  stripePaymentIntentId?: string
 
   @CreateDateColumn()
-  created_at!: Date;
+  createdAt!: Date
+
+  @Column("timestamp", { nullable: true })
+  completedAt?: Date
 }

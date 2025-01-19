@@ -1,30 +1,39 @@
-Discover.vue<script setup lang="ts">
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const searchQuery = ref('')
 
 const projects = ref([
   {
     id: 1,
     title: 'Eco-Friendly Ocean Cleaner',
     creator: 'Marine Solutions Inc.',
-    description: 'Revolutionary device to clean ocean pollution',
+    creatorAvatar: 'https://ui-avatars.com/api/?name=Marine+Solutions&background=random',
+    description: 'Revolutionary device to clean ocean pollution using sustainable energy and innovative filtration technology',
     raised: 15000,
     goal: 50000,
     backers: 234,
     daysLeft: 15,
-    image: 'ocean-cleaner.jpg',
-    category: 'Environment'
+    image: 'https://picsum.photos/800/600?random=1',
+    category: 'Environment',
+    tags: ['Eco-friendly', 'Innovation', 'Technology'],
+    featured: true,
+    progress: 30
   },
   {
     id: 2,
     title: 'Smart Urban Garden',
     creator: 'Green Tech',
+    creatorAvatar: 'https://ui-avatars.com/api/?name=Green+Tech&background=random',
     description: 'Automated vertical garden for urban spaces',
     raised: 25000,
     goal: 30000,
     backers: 456,
     daysLeft: 7,
-    image: 'urban-garden.jpg',
-    category: 'Technology'
+    image: 'https://picsum.photos/800/600?random=2',
+    category: 'Technology',
+    tags: ['Smart Home', 'Agriculture', 'IoT'],
+    featured: false
   },
   // Add more sample projects
 ])
@@ -35,21 +44,45 @@ const categories = ref([
 
 const selectedCategory = ref('All')
 
-const filterByCategory = (category: string) => {
-  selectedCategory.value = category
+const filteredProjects = computed(() => {
+  return projects.value.filter(project => {
+    const matchesCategory = selectedCategory.value === 'All' || 
+                          project.category === selectedCategory.value
+    const matchesSearch = project.title.toLowerCase()
+                          .includes(searchQuery.value.toLowerCase()) ||
+                         project.description.toLowerCase()
+                          .includes(searchQuery.value.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
+})
+
+const calculateTimeLeft = (daysLeft: number) => {
+  if (daysLeft > 30) return `${Math.floor(daysLeft / 30)} mois restants`
+  if (daysLeft > 0) return `${daysLeft} jours restants`
+  return 'Projet terminé'
 }
 </script>
 
 <template>
   <div class="discover-container">
     <header class="discover-header">
-      <h1>Discover Amazing Projects</h1>
+      <h1>Découvrez des Projets Innovants</h1>
+      
+      <div class="search-bar">
+        <input 
+          type="text"
+          v-model="searchQuery"
+          placeholder="Rechercher un projet..."
+          class="search-input"
+        >
+      </div>
+
       <div class="category-filters">
         <button 
           v-for="category in categories" 
           :key="category"
           :class="['category-btn', { active: selectedCategory === category }]"
-          @click="filterByCategory(category)"
+          @click="selectedCategory = category"
         >
           {{ category }}
         </button>
@@ -57,46 +90,188 @@ const filterByCategory = (category: string) => {
     </header>
 
     <div class="projects-grid">
-      <div v-for="project in projects" :key="project.id" class="project-card">
+      <div 
+        v-for="project in filteredProjects" 
+        :key="project.id" 
+        class="project-card"
+        :class="{ 'featured': project.featured }"
+      >
         <div class="project-image">
           <img :src="project.image" :alt="project.title">
           <div class="category-tag">{{ project.category }}</div>
+          <div v-if="project.featured" class="featured-badge">⭐ Featured</div>
         </div>
+
         <div class="project-info">
-          <h3>{{ project.title }}</h3>
-          <p class="creator">by {{ project.creator }}</p>
-          <p class="description">{{ project.description }}</p>
-          <div class="progress-bar">
-            <div 
-              class="progress" 
-              :style="{ width: `${(project.raised / project.goal) * 100}%` }"
-            ></div>
+          <div class="project-header">
+            <h3>{{ project.title }}</h3>
+            <div class="tags">
+              <span v-for="tag in project.tags" :key="tag" class="tag">
+                {{ tag }}
+              </span>
+            </div>
           </div>
+
+          <p class="creator">
+            <img :src="project.creatorAvatar" class="creator-avatar">
+            par {{ project.creator }}
+          </p>
+
+          <p class="description">{{ project.description }}</p>
+
+          <div class="progress-section">
+            <div class="progress-bar">
+              <div 
+                class="progress" 
+                :style="{ width: `${(project.raised / project.goal) * 100}%` }"
+              ></div>
+            </div>
+            <div class="progress-stats">
+              <span class="percentage">{{ Math.round((project.raised / project.goal) * 100) }}%</span>
+              <span class="goal">objectif: ${{ project.goal.toLocaleString() }}</span>
+            </div>
+          </div>
+
           <div class="stats">
             <div class="stat">
               <span class="value">${{ project.raised.toLocaleString() }}</span>
-              <span class="label">raised of ${{ project.goal.toLocaleString() }}</span>
+              <span class="label">collectés</span>
             </div>
             <div class="stat">
               <span class="value">{{ project.backers }}</span>
-              <span class="label">backers</span>
+              <span class="label">contributeurs</span>
             </div>
             <div class="stat">
-              <span class="value">{{ project.daysLeft }}</span>
-              <span class="label">days left</span>
+              <span class="value time-left">{{ calculateTimeLeft(project.daysLeft) }}</span>
             </div>
           </div>
+
+          <router-link :to="`/projects/${project.id}`" class="view-project">
+            Voir le projet
+            <span class="arrow">→</span>
+          </router-link>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style>
+<style scoped>
 .discover-container {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
+}
+
+.search-bar {
+  margin: 2rem 0;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem 1.5rem;
+  border: 2px solid #374151;
+  border-radius: 2rem;
+  background: #1f2937;
+  color: white;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.project-card {
+  position: relative;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.project-card.featured {
+  border: 2px solid #ef4444;
+}
+
+.featured-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-weight: 600;
+}
+
+.tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+
+.tag {
+  background: #374151;
+  color: #9ca3af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+}
+
+.creator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.creator-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.progress-section {
+  margin: 1.5rem 0;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.view-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ef4444;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: gap 0.3s ease;
+}
+
+.view-project:hover {
+  gap: 1rem;
+}
+
+.arrow {
+  transition: transform 0.3s ease;
+}
+
+.view-project:hover .arrow {
+  transform: translateX(4px);
 }
 
 .discover-header {
@@ -138,18 +313,6 @@ const filterByCategory = (category: string) => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
-}
-
-.project-card {
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.project-card:hover {
-  transform: translateY(-5px);
 }
 
 .project-image {

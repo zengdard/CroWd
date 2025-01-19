@@ -1,8 +1,11 @@
+import 'reflect-metadata';
+import { Reward } from './models/reward.model';
 // Import des routes
 
 import authRoutes from './routes/auth.routes';
 import projectRoutes from './routes/project.routes';
 import contributionRoutes from './routes/contribution.routes';
+import commentRoutes from './routes/comment.routes';
 // backend/src/server.ts
 import "reflect-metadata"
 import express from 'express';
@@ -12,6 +15,7 @@ import { config } from './config/config';
 import { initializeDB } from './config/database';
 import { errorHandler } from './middleware/error.middleware';
 import { configureSecurityMiddleware } from './middleware/security.middleware';
+import { databaseCheckMiddleware } from './middleware/database-check.middleware';
 
 const app = express();
 
@@ -36,6 +40,9 @@ app.options('*', cors());
 // Configuration de la sécurité
 configureSecurityMiddleware(app);
 
+// Add after express initialization and before routes
+app.use(databaseCheckMiddleware);
+
 // Routes
 // Support both /api prefix and direct paths for backwards compatibility
 app.use('/auth', authRoutes);
@@ -44,6 +51,8 @@ app.use('/projects', projectRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/contributions', contributionRoutes);
 app.use('/api/contributions', contributionRoutes);
+app.use('/comments', commentRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Add health check endpoint
 app.get('/health', (req, res) => {

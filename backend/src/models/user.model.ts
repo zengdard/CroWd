@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, OneToMany, UpdateDateColumn } from "typeorm"
 import { Project } from "./project.model"
 import { Contribution } from "./contribution.model"
 import { Transaction } from "./transaction.model"
@@ -12,11 +12,32 @@ export class User {
   @Column({ type: 'varchar', unique: true })
   username!: string
 
-  @Column({ type: 'varchar', unique: true })
+  @Column("varchar", { length: 255 })
   email!: string
 
-  @Column({ type: 'varchar' })
+  @Column("varchar", { length: 255 })
   password!: string
+
+  @Column("varchar", { length: 100 })
+  firstName!: string
+
+  @Column("varchar", { length: 100 })
+  lastName!: string
+
+  @Column("varchar", { length: 20, default: "user" })
+  role!: string
+
+  @Column("boolean", { default: false })
+  isVerified!: boolean
+
+  @Column("varchar", { length: 255, nullable: true })
+  verificationToken?: string
+
+  @Column("varchar", { length: 255, nullable: true })
+  resetPasswordToken?: string
+
+  @Column("timestamp", { nullable: true })
+  resetPasswordExpires?: Date
 
   @Column({ type: 'varchar', nullable: true })
   profile_image?: string
@@ -46,10 +67,10 @@ export class User {
   last_login?: Date
 
   @CreateDateColumn()
-  created_at!: Date
+  createdAt!: Date
 
-  @Column({ type: 'datetime', nullable: true })
-  updated_at?: Date
+  @UpdateDateColumn()
+  updatedAt?: Date
 
   @OneToMany(() => Project, project => project.creator)
   projects!: Project[]

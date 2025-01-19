@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type MarkdownIt from 'markdown-it';
-import hljs from 'highlight.js';
+import * as hljs from 'highlight.js';
+import MarkdownIt from 'markdown-it';
 
-// Import markdown-it using dynamic import to ensure proper bundling
-const md: MarkdownIt = await (async () => {
-  const MarkdownIt = (await import('markdown-it')).default;
-  return new MarkdownIt({
-    highlight: function (str, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return hljs.highlight(str, { language: lang }).value;
-        } catch (__) {}
-      }
-      return '';
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(lang, str).value;
+      } catch (__) {}
     }
-  });
-})();
+    return '';
+  }
+});
 
 const props = withDefaults(defineProps<{
   modelValue: string;
